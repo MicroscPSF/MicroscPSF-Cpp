@@ -1,0 +1,10 @@
+[wrap-git]
+url = https://gitlab.com/conradsnicta/armadillo-code.git
+revision = 14.0.2
+depth = 1
+
+patch_directory = armadillo-code
+diff_files = armadillo-code/0001-Patch-armdillo-to-support-besselj.patch
+
+[provide]
+armadillo-code = armadillo_dep
