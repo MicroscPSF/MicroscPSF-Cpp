@@ -11,3 +11,4 @@ catch2_dep = dependency('catch2-with-main')
 cxx = meson.get_compiler('cpp')
 
 subdir('besselj_armadillo_support')
+subdir('microsc-psf')

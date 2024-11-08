@@ -21,6 +21,8 @@ class eop_besselj : public eop_core<eop_besselj<order>>, public eop_use_mp_true 
  *
  * Note(Antony): We don't have a nice way to explicitly instantiate templates
  * over a range of integers. Help wanted.
+ *
+ * Reference: https://stackoverflow.com/a/67529191
  */
 template <>
 template <typename eT>
