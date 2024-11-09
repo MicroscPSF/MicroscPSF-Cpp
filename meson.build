@@ -16,3 +16,4 @@ cxx = meson.get_compiler('cpp')
 
 subdir('besselj_armadillo_support')
 subdir('microsc-psf')
+subdir('examples')
