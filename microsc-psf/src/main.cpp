@@ -71,12 +71,8 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
     using namespace arma;
     const double max_radius = round(abs(cx_double{volume.x - x0, volume.x - y0})) + 1;
 
-    const vec R = iota(params.sf * max_radius) / params.sf;
-
-    const vec Ti = Meter(params.ti0) + precision.res_axial * (iota(volume.z) - z0);
-
     const double a = 0.0;
-    const auto b = std::min({
+    const float b = std::min({
         1.0f,                    //
         params.ns / params.NA,   //
         params.ni0 / params.NA,  //
@@ -92,60 +88,83 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
     // Approximate function exp(j omega) as  Bessel series
     using ::units::literals::operator""_m;
 
-    const auto NN = precision.num_basis;
     const auto k0 = datum::pi * 2.0 * (1.0_m / Meter(params.lambda));
-    const auto r = R * precision.res_lateral;
 
-    const auto A = k0 * params.NA * r;
-    const auto Ab = pow(A, 2) * b;
+    const vec R = iota(params.sf * max_radius) / params.sf;
 
-    // Min wavelength
-    const auto k00 = datum::pi * 2 / (1.0_m / 545e-9_m);
-    const auto factor1 = k0 / k00;
+    vec A, Ab;
+    {
+        const auto r = R * precision.res_lateral;
+        A = k0 * params.NA * r;
+        Ab = pow(A, 2) * b;
+    }
 
-    // Max NA
-    const auto factor2 = params.NA / 1.4;
+    vec an;
+    {
+        const auto NN = precision.num_basis;
 
-    const auto an = (iota(1.0, NN + 1) * 3 - 2) * factor1 * factor2;
+        // Min wavelength
+        const double k00 = datum::pi * 2 / (1.0_m / 545e-9_m);
+        const double factor1 = k0 / k00;
 
-    const auto anRho = an * Rho.t();
-    const mat J = besselj<0>(anRho);
+        // Max NA
+        const double factor2 = params.NA / 1.4;
 
-    const auto J0A = besselj<0>(Ab);
-    const auto J1A = A % besselj<1>(Ab);
+        an = (iota(1.0, NN + 1) * 3 - 2) * factor1 * factor2;
+    }
 
-    const auto anJ0A = J0A * an.t();
+    mat Ele;
+    {
+        // bsxfun(@minus, an2', A2);
+        mat domin(A.n_elem, an.n_elem);
+        domin.each_row() = pow(an.t(), 2);
+        domin.each_col() -= pow(A, 2);
 
-    const auto B0anb = besselj<0>(an * b);
-    const auto B1anb = besselj<1>(an * b);
+        Ele = (                                                         //
+                  besselj<0>(Ab) * (an.t() % besselj<1>(an * b).t()) -  //
+                  (A % besselj<1>(Ab)) * besselj<0>(an * b).t()         //
+                  ) *
+              b / domin;
+    }
 
-    // bsxfun(@minus, an2', A2);
-    const mat domin = pow(an.t(), 2) - pow(A, 2);
-    const auto Ele = (anJ0A * B1anb.t() - J1A * B0anb.t()) * b / domin;
+    cx_mat Ffun;
+    {
+#define Ti Meter(params.ti0) + precision.res_axial*(iota(volume.z) - z0)
 
-    const auto C1 = params.ns * Meter(params.pz);
-    const auto C2 = params.ni * (Ti - Meter(params.ti0));
-    const auto C3 = params.ng * (Meter(params.tg) - Meter(params.tg0));
+        const double C1 = params.ns * Meter(params.pz);
+#define C2 (params.ni * (Ti - Meter(params.ti0)))
+        const double C3 = params.ng * (Meter(params.tg) - Meter(params.tg0));
 
-    const auto OPDs = C1 * sqrt(1.0 - pow(params.NA * Rho / params.ns, 2));
-    const auto OPDi = C2 % sqrt(1.0 - pow(params.NA * Rho / params.ni, 2));
-    const auto OPDg = C3 * sqrt(1 - pow(params.NA * Rho / params.ng, 2));
+#define OPDs (C1 * sqrt(1.0 - pow(params.NA * Rho.t() / params.ns, 2)))
+#define OPDi (C2 * sqrt(1.0 - pow(params.NA * Rho.t() / params.ni, 2)))
+#define OPDg (C3 * sqrt(1 - pow(params.NA * Rho.t() / params.ng, 2)))
 
-    // bsxfun(plus, OPDi, OPDs + OPDg)
-    const auto OPD = OPDi + OPDs + OPDg;
+        // bsxfun(plus, OPDi, OPDs + OPDg)
+        mat OPD = OPDi;
+        OPD.each_row() += OPDs + OPDg;
 
-    // Determine the coefficients
-    constexpr auto j = cx_double{0.0, 1.0};
+        // Determine the coefficients
+        constexpr auto j = cx_double{0.0, 1.0};
 
-    const auto W = k0 * OPD;
-    const cx_vec Ffun = cos(W) + j * sin(W);
+        const auto W = k0 * OPD;
+        Ffun = exp(j * W);
+    }
 
-    // Armadillo does not have solver for complex valued vector.
-    const auto Ci = pinv(J) * Ffun;
+    mat PSF0;
+    {
+        const mat J = besselj<0>(an * Rho.t());
 
-    // Get PSF for each slice
-    const auto ciEle = Ele.t() * Ci;
-    const mat PSF0 = real(ciEle % conj(ciEle));
+        std::cout << "J" << std::endl;
+
+        // Armadillo does not have solver for complex valued vector.
+        const cx_vec Ci = pinv(J) * Ffun;
+
+        std::cout << "Ci" << std::endl;
+
+        // Get PSF for each slice
+        const cx_mat ciEle = Ele.t() * Ci;
+        PSF0 = real(ciEle % conj(ciEle));
+    }
 
     auto PSF = cylToRectTransform(PSF0, R, params.sf, volume);
 
