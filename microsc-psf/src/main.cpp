@@ -26,7 +26,7 @@ linspace(double start, double stop, uint32_t n_samples) {
 std::pair<arma::mat, arma::mat>
 meshgrid(arma::vec&& x, arma::vec&& y) {
     arma::mat XX(x.n_elem, y.n_elem);
-    XX.each_row() = x;
+    XX.each_row() = x.t();
 
     arma::mat YY(x.n_elem, y.n_elem);
     YY.each_col() = y;
@@ -83,7 +83,9 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
 
     const auto L = precision.num_samp;
 
-    const vec Rho = linspace(a, b, L);
+    const rowvec Rho = linspace(a, b, L).t();
+    std::cout << "Rho.n_elem = " << Rho.n_elem <<
+    "\nL = " << L << std::endl;
 
     // Approximate function exp(j omega) as  Bessel series
     using ::units::literals::operator""_m;
@@ -98,6 +100,7 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
         A = k0 * params.NA * r;
         Ab = pow(A, 2) * b;
     }
+    std::cout << "A.n_elem = " << A.n_elem << std::endl;
 
     vec an;
     {
@@ -112,6 +115,7 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
 
         an = (iota(1.0, NN + 1) * 3 - 2) * factor1 * factor2;
     }
+    std::cout << "an.n_elem = " << an.n_elem << std::endl;
 
     mat Ele;
     {
@@ -129,15 +133,15 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
 
     cx_mat Ffun;
     {
-#define Ti Meter(params.ti0) + precision.res_axial*(iota(volume.z) - z0)
+#define Ti (Meter(params.ti0) + precision.res_axial*(iota(volume.z) - z0))
 
         const double C1 = params.ns * Meter(params.pz);
 #define C2 (params.ni * (Ti - Meter(params.ti0)))
         const double C3 = params.ng * (Meter(params.tg) - Meter(params.tg0));
 
-#define OPDs (C1 * sqrt(1.0 - pow(params.NA * Rho.t() / params.ns, 2)))
-#define OPDi (C2 * sqrt(1.0 - pow(params.NA * Rho.t() / params.ni, 2)))
-#define OPDg (C3 * sqrt(1 - pow(params.NA * Rho.t() / params.ng, 2)))
+#define OPDs (C1 * sqrt(1.0 - pow(params.NA * Rho / params.ns, 2)))
+#define OPDi (C2 * sqrt(1.0 - pow(params.NA * Rho / params.ni, 2)))
+#define OPDg (C3 * sqrt(1 - pow(params.NA * Rho / params.ng, 2)))
 
         // bsxfun(plus, OPDi, OPDs + OPDg)
         mat OPD = OPDi;
@@ -149,22 +153,20 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
         const auto W = k0 * OPD;
         Ffun = exp(j * W);
     }
+    std::cout << "Ffun = " << Ffun.n_rows << ',' << Ffun.n_cols << std::endl;
 
     mat PSF0;
     {
-        const mat J = besselj<0>(an * Rho.t());
-
-        std::cout << "J" << std::endl;
+        const mat J = besselj<0>(an * Rho);
 
         // Armadillo does not have solver for complex valued vector.
-        const cx_vec Ci = pinv(J) * Ffun;
+        #define Ci (pinv(J.t()) * Ffun.t())
 
-        std::cout << "Ci" << std::endl;
-
-        // Get PSF for each slice
-        const cx_mat ciEle = Ele.t() * Ci;
+        const cx_mat ciEle = Ele * Ci;
         PSF0 = real(ciEle % conj(ciEle));
+
     }
+    std::cout << "PSF0 = " << PSF0.n_rows << ',' << PSF0.n_cols << std::endl;
 
     auto PSF = cylToRectTransform(PSF0, R, params.sf, volume);
 
