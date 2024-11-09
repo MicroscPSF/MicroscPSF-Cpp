@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "make_psf.h"
 
 // This must come after header file <armadillo>.
@@ -38,21 +40,23 @@ arma::Cube<double>
 cylToRectTransform(const arma::mat& PSF0, const arma::vec& R, double over_sample,
                    microscPSF::pair_t<int32_t> volume) {
     using namespace arma;
+    assert(PSF0.n_cols == uint32_t(volume.z));
 
     const double x0 = (volume.x - 1) / 2;
     const double y0 = x0;
 
     const auto [X, Y] = meshgrid(iota(volume.x) - x0, iota(volume.x) - y0);
 
-    const mat rPixel = sqrt(pow(X, 2) + pow(Y, 2));
-    const umat index = conv_to<umat>::from(rPixel * over_sample);
+    const vec rPixel = sqrt(pow(X, 2) + pow(Y, 2)).as_col();
+    const uvec index = conv_to<umat>::from(rPixel * over_sample);
 
-    const auto disR = (rPixel - R(index)) * over_sample;
+#define disR (rPixel - R(index)) * over_sample
 
     Cube<double> PSF(volume.x, volume.x, volume.z);
     for (uint32_t zi = 0; zi < uint32_t(volume.z); zi++) {
-        const vec h = PSF0.col(zi);
-        PSF.slice(zi) = h(index + 1) % disR + h(index) % (1.0 - disR);
+        const mat h = PSF0.col(zi);
+        PSF.slice(zi) =
+            resize(h(index + 1) % disR + h(index) % (1.0 - disR), SizeMat{X.n_rows, X.n_cols});
     }
 
     return PSF;
@@ -84,8 +88,6 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
     const auto L = precision.num_samp;
 
     const rowvec Rho = linspace(a, b, L).t();
-    std::cout << "Rho.n_elem = " << Rho.n_elem <<
-    "\nL = " << L << std::endl;
 
     // Approximate function exp(j omega) as  Bessel series
     using ::units::literals::operator""_m;
@@ -100,7 +102,6 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
         A = k0 * params.NA * r;
         Ab = pow(A, 2) * b;
     }
-    std::cout << "A.n_elem = " << A.n_elem << std::endl;
 
     vec an;
     {
@@ -115,7 +116,6 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
 
         an = (iota(1.0, NN + 1) * 3 - 2) * factor1 * factor2;
     }
-    std::cout << "an.n_elem = " << an.n_elem << std::endl;
 
     mat Ele;
     {
@@ -153,7 +153,6 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
         const auto W = k0 * OPD;
         Ffun = exp(j * W);
     }
-    std::cout << "Ffun = " << Ffun.n_rows << ',' << Ffun.n_cols << std::endl;
 
     mat PSF0;
     {
