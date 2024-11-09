@@ -11,24 +11,23 @@ using Meter = ::units::Meter<double>;
 using namespace ::units::literals;
 
 struct params_li2017_t {
-    Micron ti0 = 150.0_um;
-    float ni0 = 1.5;
-    float ni = 1.5;
-    Micron tg0 = 170.0_um;
-    Micron tg = 170.0_um;
-    float ng0 = 1.5;
-    float ng = 1.5;
-    float ns = 1.33;
-    Micron lambda = 0.610_um;
-    float NA = 1.4;
-    int sf = 2;
-    int mode = 1;
+    Micron ti0 = 150.0_um;     //!< Expected immersion medium thickness
+    float ni0 = 1.5;           //!< Expected immersion medium refractive index
+    float ni = 1.5;            //!< Measured immersion medium refractive index
+    Micron tg0 = 170.0_um;     //!< Expected coverglass thickness
+    Micron tg = 170.0_um;      //!< Measured coverglass thickness
+    float ng0 = 1.5;           //!< Expected coverglass refractive index
+    float ng = 1.5;            //!< Measured coverglass refractive index
+    float ns = 1.33;           //!< Sample refractive index
+    Micron lambda = 0.610_um;  //!< Emission wavelength
+    float NA = 1.4;            //!< Numerical aperture
 
-    Micron pz = 2.0_um;
+    Micron pz = 2.0_um;  //!< Particle z distance from the sample-to-coverglass interface
 };
 
 struct precision_li2017_t {
-    uint32_t num_samp = 1000;
+    int sf = 2;                //!< Oversample factor
+    uint32_t rho_samples = 1000;
     Meter res_axial = 250e-9_m;
     Meter res_lateral = 100e-9_m;
     uint8_t num_basis = 100;

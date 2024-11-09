@@ -1,3 +1,6 @@
+#define ARMA_USE_HDF5
+#include <armadillo>
+
 #include "make_psf.h"
 
 int main() {
