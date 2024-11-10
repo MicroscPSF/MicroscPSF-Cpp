@@ -91,7 +91,7 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
     cx_mat phase;
     {
 /** Coverglass z offset in meter */
-#define Ti (Meter(params.ti0) + precision.res_axial * (iota(volume.z) - z0))
+#define Ti (Meter(params.ti0) + Meter(voxel.z) * (iota(volume.z) - z0))
 
         const double C1 = params.ns * Meter(params.pz);
 #define C2 (params.ni * (Ti - Meter(params.ti0)))
@@ -116,7 +116,7 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
     // See equation 5 in Li, Xue, and Blu 2017.
     mat Ele;
     {
-        const vec A = k0 * params.NA * (R * precision.res_lateral);
+        const vec A = k0 * params.NA * Meter(voxel.x) * R;
 
         // bsxfun(@minus, an2', A2);
         mat domin(A.n_elem, scaling_factor.n_elem);

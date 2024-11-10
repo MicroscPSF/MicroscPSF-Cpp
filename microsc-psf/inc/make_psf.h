@@ -28,8 +28,6 @@ struct params_li2017_t {
 struct precision_li2017_t {
     int sf = 2;                //!< Oversample factor
     uint32_t rho_samples = 1000;
-    Meter res_axial = 0.25_um;
-    Meter res_lateral = 0.1_um;
     uint32_t num_basis = 100;
 };
 
