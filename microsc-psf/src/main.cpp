@@ -55,7 +55,7 @@ cylToRectTransform(const arma::mat& PSF0, const arma::vec& R, microscPSF::pair_t
 namespace microscPSF {
 
 arma::Cube<double>
-makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
+makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume, Micron wavelength,
         precision_li2017_t precision) {
     using ::units::literals::operator""_m;
 
@@ -79,11 +79,11 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
                           params.NA;
 
     // Wavenumber of emitted light.
-    const auto k0 = datum::pi * 2.0 * (1.0_m / Meter(params.lambda));
+    const auto k0 = datum::pi * 2.0 * (1.0_m / Meter(wavelength));
 
     constexpr auto min_wavelength = 436e-9_m;
     const vec scaling_factor =
-        (iota(1.0, precision.num_basis + 1) * 3 - 2) * params.NA * (min_wavelength / params.lambda);
+        (iota(1.0, precision.num_basis + 1) * 3 - 2) * params.NA * (min_wavelength / wavelength);
 
     const rowvec Rho = linspace<rowvec>(0.0, max_rho, precision.rho_samples);
 

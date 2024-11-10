@@ -19,7 +19,6 @@ struct params_li2017_t {
     float ng0 = 1.5;           //!< Expected coverglass refractive index
     float ng = 1.5;            //!< Measured coverglass refractive index
     float ns = 1.33;           //!< Sample refractive index
-    Micron lambda = 0.610_um;  //!< Emission wavelength
     float NA = 1.4;            //!< Numerical aperture
 
     Micron pz = 2.0_um;  //!< Particle z distance from the sample-to-coverglass interface
@@ -38,5 +37,5 @@ struct pair_t {
 };
 
 arma::Cube<double> makePSF(params_li2017_t, pair_t<Micron> voxel, pair_t<int32_t> volume,
-                           precision_li2017_t);
+                           Micron wavelength = 0.530_um, precision_li2017_t = {});
 }  // namespace microscPSF
