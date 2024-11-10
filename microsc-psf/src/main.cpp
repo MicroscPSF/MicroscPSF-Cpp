@@ -39,12 +39,13 @@ cylToRectTransform(const arma::mat& PSF0, const arma::vec& R, microscPSF::pair_t
     }
 
     Cube<double> PSF(volume.x, volume.x, volume.z);
+#pragma omp parallel for
     for (uint32_t zi = 0; zi < uint32_t(volume.z); zi++) {
         // Memory map the PSF slice to an 1D vector without memory copy.
         vec interpolated{&(PSF(0, 0, zi)), uint32_t(volume.x * volume.x), false, true};
 
-        interp1(R, PSF0.col(zi), rPixel, interpolated, "linear");
-        // PSF.slice(zi) = resize(interpolated, SizeMat{volume.x, volume.x});
+        interp1(R, PSF0.col(zi), rPixel, interpolated, "linear", 0.0);
+        // PSF.slice(zi) = reshape(interpolated, SizeMat{volume.x, volume.x});
     }
 
     return PSF;
@@ -68,30 +69,21 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
     const double max_radius = round(abs(cx_double{volume.x - x0, volume.x - y0})) + 1;
 
     const float max_rho = std::min({
-        1.0f,                    //
-        params.ns / params.NA,   //
-        params.ni0 / params.NA,  //
-        params.ni / params.NA,   //
-        params.ng0 / params.NA,  //
-        params.ng / params.NA    //
-    });
+                              params.NA,   //
+                              params.ns,   //
+                              params.ni0,  //
+                              params.ni,   //
+                              params.ng0,  //
+                              params.ng    //
+                          }) /
+                          params.NA;
 
     // Wavenumber of emitted light.
     const auto k0 = datum::pi * 2.0 * (1.0_m / Meter(params.lambda));
 
-    vec scaling_factor;
-    {
-        constexpr auto min_wavelength = 436e-9_m;
-        constexpr auto max_NA = 1.4;
-
-        // Convert min wavelength to max wavenumber
-        const double k00 = datum::pi * 2 / (1.0_m / min_wavelength);
-
-        // Scaling factors for the Fourier-Bessel series expansion
-        const auto [factor1, factor2] = std::pair{k0 / k00, params.NA / max_NA};
-
-        scaling_factor = (iota(1.0, precision.num_basis + 1) * 3 - 2) * factor1 * factor2;
-    }
+    constexpr auto min_wavelength = 436e-9_m;
+    const vec scaling_factor =
+        (iota(1.0, precision.num_basis + 1) * 3 - 2) * params.NA * (min_wavelength / params.lambda);
 
     const rowvec Rho = linspace<rowvec>(0.0, max_rho, precision.rho_samples);
 
@@ -154,18 +146,18 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume,
         // Note the matrix transposes to get the dimensions correct.
         //
         // Note: Armadillo does not have solver for real-valued matrix and complex-valued vector.
-        // #define Ci (pinv(J.t()) * phase.t());
+        // #define Ci (pinv(J.t()) * phase.t())
         cx_mat&& Ci = solve(conv_to<cx_mat>::from(J.t()), phase.t());
 
         const cx_mat ciEle = Ele * Ci;
         PSF0 = real(ciEle % conj(ciEle));
     }
 
-    {
-        const Mat<uint8_t> PSF0_normalized =
-            conv_to<Mat<uint8_t>>::from(PSF0 * 255 / max(max(PSF0)));
-        PSF0_normalized.save("psf.pgm", pgm_binary);
-    }
+    //{
+    //    const Mat<uint8_t> PSF0_normalized =
+    //        conv_to<Mat<uint8_t>>::from(PSF0 * 255 / max(max(PSF0))).t();
+    //    PSF0_normalized.save("psf.pgm", pgm_binary);
+    //}
 
     auto PSF = cylToRectTransform(PSF0, R, volume);
 
