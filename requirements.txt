@@ -1,0 +1,2 @@
+# Placeholder config to satisfy the Github CI runner.
+# To be converted to pyproject.toml when we expose the Python bindings.

@@ -1,17 +1,23 @@
 # C++17 port of the MicroscPSF-Matlab project
 
+[![Compile and test C++](https://github.com/MicroscPSF/MicroscPSF-Cpp/actions/workflows/validate-build.yml/badge.svg)](https://github.com/MicroscPSF/MicroscPSF-Cpp/actions/workflows/validate-build.yml)
+
 ## Status
 
-Currently, this work is a *very* early work in progress. Refer to https://github.com/MicroscPSF/MicroscPSF-Matlab
+Currently, this work is a *very* early work in progress. Refer to
+https://github.com/MicroscPSF/MicroscPSF-Matlab for the reference implementation.
 
 ## Quick start
 
 ### Ubuntu/Linux
 
-Install the compiler toolchain:
+Install the compiler toolchain and the BLAS/LAPACK library:
 
 ```bash
 sudo apt install build-essentials
+
+# Use Openblas or Atlas or the original BLAS/LAPACK.
+sudo apt install libopenblas-dev
 ```
 
 Install Meson the build system:

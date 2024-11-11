@@ -1,0 +1,64 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Compile and test C++
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [edited, submitted]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        #os: [ubuntu-20.04, ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-20.04, ubuntu-latest]
+        python-version: ["3.10"]
+
+    steps:
+    - name: Fetch sources
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: pip
+
+    - name: Install gcc toolchain
+      run: >-
+        sudo apt-get install
+        build-essential
+        libopenblas-dev
+      if: startsWith(matrix.os, 'ubuntu') == true
+
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade uv
+        uv pip install --system meson ninja
+
+    - name: Cache 3rd party C++ projects
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-meson-cache
+        path: 3rdparty/packagecache/
+
+    - name: Resolve C++ build dependencies (non-Windows)
+      run: meson setup build/
+      if: startsWith(matrix.os, 'window') == false
+
+    #- name: Resolve C++ build dependencies (msvc toolchain)
+    #  run: meson setup --vsenv build/
+    #  if: startsWith(matrix.os, 'window') == true
+
+    - name: Build everything
+      #run: meson compile -C build/
+      run: ninja -C build/ all
+
+    - name: Test everything
+      #run: meson test -C build/
+      run: ninja -C build/ test
