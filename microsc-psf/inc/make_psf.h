@@ -4,7 +4,7 @@
 
 #include "units.h"
 
-namespace microscPSF {
+namespace microsc_psf {
 
 using Micron = ::units::Micrometer<double>;
 using Meter = ::units::Meter<double>;
@@ -25,7 +25,7 @@ struct microscope_params_t {
 };
 
 /** Solver of linear equations */
-enum linear_solver_option_t {
+enum linear_solver_option_t : uint8_t {
     // Sanderson and Curtin 2020, an adaptive solver for systems of linear equations.
     // https://arma.sourceforge.net/armadillo_solver_2020.pdf
     SandersonAndCurtin2020,
@@ -35,7 +35,7 @@ enum linear_solver_option_t {
 };
 
 struct precision_li2017_t {
-    int over_sampling = 2;                //!< Oversample factor
+    uint32_t over_sampling = 2;  //!< Oversample factor
     uint32_t rho_samples = 1000;
     uint32_t num_basis = 100;
     Micron min_wavelength = 0.436_um;
@@ -48,6 +48,6 @@ struct pair_t {
     T z{};
 };
 
-arma::Cube<double> makePSF(microscope_params_t, pair_t<Micron> voxel, pair_t<int32_t> volume,
+arma::Cube<double> makePSF(microscope_params_t, pair_t<Micron> voxel, pair_t<uint32_t> volume,
                            Micron wavelength = 0.530_um, precision_li2017_t = {});
-}  // namespace microscPSF
+}  // namespace microsc_psf

@@ -3,7 +3,7 @@
 #include "make_psf.h"
 
 // This must come after header file <armadillo>.
-#include <besselj_support.hpp>
+#include <armadillo_besselj_support.hpp>
 namespace {
 
 // Return the range [0, N), excluding N.
@@ -22,13 +22,14 @@ iota(uint32_t N) {
 
 /** Piecewise linear interpolation. */
 arma::Cube<double>
-cylToRectTransform(const arma::mat& PSF0, const arma::vec& R, microscPSF::pair_t<int32_t> volume) {
+cylToRectTransform(const arma::mat& PSF0, const arma::vec& R,
+                   microsc_psf::pair_t<uint32_t> volume) {
     using namespace arma;
     assert(PSF0.n_cols == uint32_t(volume.z));
 
     vec rPixel;
     {
-        const double x0 = (volume.x - 1) / 2;
+        const double x0 = (volume.x - 1) / 2.0;
 
         // meshgrid(0:nx - x0, 0:ny - y0)
         mat X(volume.x, volume.x);
@@ -40,9 +41,9 @@ cylToRectTransform(const arma::mat& PSF0, const arma::vec& R, microscPSF::pair_t
 
     Cube<double> PSF(volume.x, volume.x, volume.z);
 #pragma omp parallel for
-    for (uint32_t zi = 0; zi < uint32_t(volume.z); zi++) {
+    for (uint32_t zi = 0; zi < volume.z; zi++) {
         // Memory map the PSF slice to an 1D vector without memory copy.
-        vec interpolated{&(PSF(0, 0, zi)), uint32_t(volume.x * volume.x), false, true};
+        vec interpolated{&(PSF(0, 0, zi)), static_cast<uint64_t>(volume.x) * volume.x, false, true};
 
         interp1(R, PSF0.col(zi), rPixel, interpolated, "linear", 0.0);
     }
@@ -51,16 +52,16 @@ cylToRectTransform(const arma::mat& PSF0, const arma::vec& R, microscPSF::pair_t
 }
 }  // namespace
 
-namespace microscPSF {
+namespace microsc_psf {
 
 arma::Cube<double>
-makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<int32_t> volume, Micron wavelength,
-        precision_li2017_t precision) {
+makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<uint32_t> volume,
+        Micron wavelength, precision_li2017_t precision) {
     using ::units::literals::operator""_m;
 
-    const double x0 = (volume.x - 1) / 2;
+    const double x0 = (volume.x - 1) / 2.0;
     const double y0 = x0;
-    const double z0 = (volume.z - 1) / 2;
+    const double z0 = (volume.z - 1) / 2.0;
 
     using namespace arma;
 
@@ -108,7 +109,7 @@ makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<int32_t> volume
     }
 
     // Radius coordinates in the PSF RZ plane.
-    const vec R = iota(precision.over_sampling * max_radius) / precision.over_sampling;
+    const vec R = iota(static_cast<uint32_t>(precision.over_sampling * max_radius)) / precision.over_sampling;
 
     // Approximate function exp(j omega) as  Bessel series
     // See equation 5 in Li, Xue, and Blu 2017.
@@ -153,12 +154,6 @@ makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<int32_t> volume
         PSF0 = real(ciEle % conj(ciEle));
     }
 
-    //{
-    //    const Mat<uint8_t> PSF0_normalized =
-    //        conv_to<Mat<uint8_t>>::from(PSF0 * 255 / max(max(PSF0))).t();
-    //    PSF0_normalized.save("psf.pgm", pgm_binary);
-    //}
-
     auto PSF = cylToRectTransform(PSF0, R, volume);
 
     // Normalize the intensity.
@@ -167,4 +162,4 @@ makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<int32_t> volume
     return PSF;
 }
 
-}  // namespace microscPSF
+}  // namespace microsc_psf

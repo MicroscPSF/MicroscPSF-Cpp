@@ -1,5 +1,5 @@
 project('armadillo', 'cpp',
-    version: '10.1.x',
+    version: '14.1.x',
 )
 
 # Header-only library

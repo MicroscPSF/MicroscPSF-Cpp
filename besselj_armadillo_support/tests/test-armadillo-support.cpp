@@ -1,5 +1,5 @@
 #include <armadillo>
-#include <besselj_support.hpp>
+#include <armadillo_besselj_support.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <cstdint>
 

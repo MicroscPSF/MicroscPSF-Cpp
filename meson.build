@@ -2,7 +2,7 @@ project('MicroscPSF', 'cpp',
     license: 'MIT',
     license_files: [
         'LICENSE.txt',
-        '3rdparty/armadillo-code/LICENSE.txt',
+        #'3rdparty/armadillo-code/LICENSE.txt',
     ],
     subproject_dir: '3rdparty',
     default_options: [

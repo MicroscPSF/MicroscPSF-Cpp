@@ -6,6 +6,8 @@
 #include <cmath>
 #include <cstdint>
 
+#include <armadillo>
+
 namespace arma {
 
 // Enable OpenMP multithreading support.
