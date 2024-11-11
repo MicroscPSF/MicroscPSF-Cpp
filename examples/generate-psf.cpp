@@ -4,14 +4,14 @@
 
 int main() {
     using microscPSF::makePSF;
-    using microscPSF::params_li2017_t;
+    using microscPSF::microscope_params_t;
     using microscPSF::precision_li2017_t;
     using arma::hdf5_name;
     namespace hdf5_opts = arma::hdf5_opts;
     using namespace ::units::literals;
 
     const auto psf =
-        makePSF(params_li2017_t{}, {0.1_um, 0.25_um}, {120, 63}, 0.530_um, precision_li2017_t{});
+        makePSF(microscope_params_t{}, {0.1_um, 0.25_um}, {120, 63}, 0.530_um, precision_li2017_t{});
 #ifdef ARMA_USE_HDF5
     psf.save(hdf5_name("psf.h5", "psf", hdf5_opts::trans));
 #endif

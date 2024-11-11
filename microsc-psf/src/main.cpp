@@ -55,7 +55,7 @@ cylToRectTransform(const arma::mat& PSF0, const arma::vec& R, microscPSF::pair_t
 namespace microscPSF {
 
 arma::Cube<double>
-makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume, Micron wavelength,
+makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<int32_t> volume, Micron wavelength,
         precision_li2017_t precision) {
     using ::units::literals::operator""_m;
 
@@ -110,7 +110,7 @@ makePSF(params_li2017_t params, pair_t<Micron> voxel, pair_t<int32_t> volume, Mi
     }
 
     // Radius coordinates in the PSF RZ plane.
-    const vec R = iota(precision.sf * max_radius) / precision.sf;
+    const vec R = iota(precision.over_sampling * max_radius) / precision.over_sampling;
 
     // Approximate function exp(j omega) as  Bessel series
     // See equation 5 in Li, Xue, and Blu 2017.

@@ -10,7 +10,7 @@ using Micron = ::units::Micrometer<double>;
 using Meter = ::units::Meter<double>;
 using namespace ::units::literals;
 
-struct params_li2017_t {
+struct microscope_params_t {
     Micron ti0 = 150.0_um;     //!< Expected immersion medium thickness
     float ni0 = 1.5;           //!< Expected immersion medium refractive index
     float ni = 1.5;            //!< Measured immersion medium refractive index
@@ -25,7 +25,7 @@ struct params_li2017_t {
 };
 
 struct precision_li2017_t {
-    int sf = 2;                //!< Oversample factor
+    int over_sampling = 2;                //!< Oversample factor
     uint32_t rho_samples = 1000;
     uint32_t num_basis = 100;
 };
@@ -36,6 +36,6 @@ struct pair_t {
     T z{};
 };
 
-arma::Cube<double> makePSF(params_li2017_t, pair_t<Micron> voxel, pair_t<int32_t> volume,
+arma::Cube<double> makePSF(microscope_params_t, pair_t<Micron> voxel, pair_t<int32_t> volume,
                            Micron wavelength = 0.530_um, precision_li2017_t = {});
 }  // namespace microscPSF
