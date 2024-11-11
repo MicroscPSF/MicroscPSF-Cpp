@@ -1,4 +1,3 @@
-#define ARMA_USE_HDF5
 #include <armadillo>
 
 #include "make_psf.h"
@@ -12,8 +11,22 @@ int main() {
     using namespace ::units::literals;
 
     const auto psf =
-        makePSF(params_li2017_t{}, {0.1_um, 0.25_um}, {256, 128}, 0.530_um, precision_li2017_t{});
+        makePSF(params_li2017_t{}, {0.1_um, 0.25_um}, {120, 63}, 0.530_um, precision_li2017_t{});
+#ifdef ARMA_USE_HDF5
     psf.save(hdf5_name("psf.h5", "psf", hdf5_opts::trans));
+#endif
 
+    {
+        using namespace arma;
+        mat xy_plane = sqrt(psf.slice(32));
+        xy_plane *= 255 / max(xy_plane.as_col());
+        xy_plane.save("psf_xy.pgm", pgm_binary);
+    }
+
+    {
+        using namespace arma;
+        mat xz_plane = sqrt(psf.col(60));
+        mat(xz_plane.t() * 255 / max(xz_plane.as_col())).save("psf_xz.pgm", pgm_binary);
+    }
     return 0;
 }
