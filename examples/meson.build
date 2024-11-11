@@ -17,6 +17,7 @@ generate_psf_exe = executable('generate-psf',
         microsc_psf_dep,
         hdf5_dep,
     ],
+    install: get_option('install_examples'),
 )
 
 test('Smoke test', generate_psf_exe)

@@ -1,9 +1,10 @@
+microsc_psf_inc = include_directories('inc')
 microsc_psf_lib = static_library('microsc-psf',
     sources: [
         'src/main.cpp',
     ],
     include_directories: [
-        'inc',
+        microsc_psf_inc,
         armadillo_besselj_support_inc,
     ],
     dependencies: [
@@ -16,8 +17,7 @@ microsc_psf_dep = declare_dependency(
         microsc_psf_lib,
     ],
     include_directories: [
-        'inc',
-        armadillo_besselj_support_inc,
+        microsc_psf_inc,
     ],
     dependencies: [
         armadillo_dep,

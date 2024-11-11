@@ -42,7 +42,7 @@ ninja test
 ```bash
 ninja install
 cd MicroscPSF-Cpp/build/
-meson configure -Dbuild_examples=true
+meson configure -Dinstall_examples=true
 ninja all
 sudo ninja install
 ```
