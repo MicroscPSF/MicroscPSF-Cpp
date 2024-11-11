@@ -45,7 +45,6 @@ cylToRectTransform(const arma::mat& PSF0, const arma::vec& R, microscPSF::pair_t
         vec interpolated{&(PSF(0, 0, zi)), uint32_t(volume.x * volume.x), false, true};
 
         interp1(R, PSF0.col(zi), rPixel, interpolated, "linear", 0.0);
-        // PSF.slice(zi) = reshape(interpolated, SizeMat{volume.x, volume.x});
     }
 
     return PSF;
@@ -81,9 +80,8 @@ makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<int32_t> volume
     // Wavenumber of emitted light.
     const auto k0 = datum::pi * 2.0 * (1.0_m / Meter(wavelength));
 
-    constexpr auto min_wavelength = 436e-9_m;
-    const vec scaling_factor =
-        (iota(1.0, precision.num_basis + 1) * 3 - 2) * params.NA * (min_wavelength / wavelength);
+    const vec scaling_factor = (iota(1.0, precision.num_basis + 1) * 3 - 2) * params.NA *
+                               (precision.min_wavelength / wavelength);
 
     const rowvec Rho = linspace<rowvec>(0.0, max_rho, precision.rho_samples);
 
@@ -146,8 +144,10 @@ makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<int32_t> volume
         // Note the matrix transposes to get the dimensions correct.
         //
         // Note: Armadillo does not have solver for real-valued matrix and complex-valued vector.
-        // #define Ci (pinv(J.t()) * phase.t())
-        cx_mat&& Ci = solve(conv_to<cx_mat>::from(J.t()), phase.t());
+        // Reference: https://arma.sourceforge.net/armadillo_solver_2020.pdf
+        cx_mat&& Ci = (precision.solver == SandersonAndCurtin2020)
+                          ? solve(conv_to<cx_mat>::from(J.t()), phase.t())
+                          : cx_mat(pinv(J.t()) * phase.t());
 
         const cx_mat ciEle = Ele * Ci;
         PSF0 = real(ciEle % conj(ciEle));

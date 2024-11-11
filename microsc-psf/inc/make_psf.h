@@ -8,7 +8,7 @@ namespace microscPSF {
 
 using Micron = ::units::Micrometer<double>;
 using Meter = ::units::Meter<double>;
-using namespace ::units::literals;
+using ::units::literals::operator""_um;
 
 struct microscope_params_t {
     Micron ti0 = 150.0_um;     //!< Expected immersion medium thickness
@@ -24,10 +24,22 @@ struct microscope_params_t {
     Micron pz = 2.0_um;  //!< Particle z distance from the sample-to-coverglass interface
 };
 
+/** Solver of linear equations */
+enum linear_solver_option_t {
+    // Sanderson and Curtin 2020, an adaptive solver for systems of linear equations.
+    // https://arma.sourceforge.net/armadillo_solver_2020.pdf
+    SandersonAndCurtin2020,
+
+    // Penrose pseudo inverse.
+    PenroseInverse
+};
+
 struct precision_li2017_t {
     int over_sampling = 2;                //!< Oversample factor
     uint32_t rho_samples = 1000;
     uint32_t num_basis = 100;
+    Micron min_wavelength = 0.436_um;
+    linear_solver_option_t solver = SandersonAndCurtin2020;
 };
 
 template <typename T>
