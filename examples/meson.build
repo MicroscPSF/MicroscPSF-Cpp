@@ -1,4 +1,4 @@
-add_languages('c')
+add_languages('c', native: false)
 
 hdf5_dep = dependency('hdf5', language: 'c', required: false)
 

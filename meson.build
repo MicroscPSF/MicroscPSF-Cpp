@@ -1,4 +1,5 @@
 project('MicroscPSF', 'cpp',
+    meson_version: '>=1.1',
     license: 'MIT',
     license_files: [
         'LICENSE.txt',
