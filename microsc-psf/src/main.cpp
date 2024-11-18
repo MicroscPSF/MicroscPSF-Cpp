@@ -23,27 +23,27 @@ iota(uint32_t N) {
 /** Piecewise linear interpolation. */
 arma::Cube<double>
 cylToRectTransform(const arma::mat& PSF0, const arma::vec& R,
-                   microsc_psf::pair_t<uint32_t> volume) {
+                   microsc_psf::scale_t<uint32_t> volume) {
     using namespace arma;
     assert(PSF0.n_cols == uint32_t(volume.z));
 
     vec rPixel;
     {
-        const double x0 = (volume.x - 1) / 2.0;
+        const double x0 = (volume.xy - 1) / 2.0;
 
         // meshgrid(0:nx - x0, 0:ny - y0)
-        mat X(volume.x, volume.x);
-        X.each_row() = (iota(volume.x) - x0).t();
+        mat X(volume.xy, volume.xy);
+        X.each_row() = (iota(volume.xy) - x0).t();
 #define Y X.t()
 
         rPixel = sqrt(X % X + Y % Y).as_col();
     }
 
-    Cube<double> PSF(volume.x, volume.x, volume.z);
+    Cube<double> PSF(volume.xy, volume.xy, volume.z);
 #pragma omp parallel for
     for (uint32_t zi = 0; zi < volume.z; zi++) {
         // Memory map the PSF slice to an 1D vector without memory copy.
-        vec interpolated{&(PSF(0, 0, zi)), static_cast<uint64_t>(volume.x) * volume.x, false, true};
+        vec interpolated{&(PSF(0, 0, zi)), static_cast<uint64_t>(volume.xy) * volume.xy, false, true};
 
         interp1(R, PSF0.col(zi), rPixel, interpolated, "linear", 0.0);
     }
@@ -55,18 +55,18 @@ cylToRectTransform(const arma::mat& PSF0, const arma::vec& R,
 namespace microsc_psf {
 
 arma::Cube<double>
-makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<uint32_t> volume,
+makePSF(microscope_params_t params, scale_t<Micron> voxel, scale_t<uint32_t> volume,
         Micron wavelength, precision_li2017_t precision) {
     using ::units::literals::operator""_m;
 
-    const double x0 = (volume.x - 1) / 2.0;
+    const double x0 = (volume.xy - 1) / 2.0;
     const double y0 = x0;
     const double z0 = (volume.z - 1) / 2.0;
 
     using namespace arma;
 
     // Max radius is the length of the diagonal of the volume xy plane.
-    const double max_radius = round(abs(cx_double{volume.x - x0, volume.x - y0})) + 1;
+    const double max_radius = round(abs(cx_double{volume.xy - x0, volume.xy - y0})) + 1;
 
     const float max_rho = std::min({
                               params.NA,   //
@@ -115,7 +115,7 @@ makePSF(microscope_params_t params, pair_t<Micron> voxel, pair_t<uint32_t> volum
     // See equation 5 in Li, Xue, and Blu 2017.
     mat Ele;
     {
-        const vec A = k0 * params.NA * Meter(voxel.x) * R;
+        const vec A = k0 * params.NA * Meter(voxel.xy) * R;
 
         // bsxfun(@minus, an2', A2);
         mat domin(A.n_elem, scaling_factor.n_elem);

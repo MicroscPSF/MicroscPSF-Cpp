@@ -43,11 +43,11 @@ struct precision_li2017_t {
 };
 
 template <typename T>
-struct pair_t {
-    T x{};
+struct scale_t {
+    T xy{};
     T z{};
 };
 
-arma::Cube<double> makePSF(microscope_params_t, pair_t<Micron> voxel, pair_t<uint32_t> volume,
+arma::Cube<double> makePSF(microscope_params_t, scale_t<Micron> voxel, scale_t<uint32_t> volume,
                            Micron wavelength = 0.530_um, precision_li2017_t = {});
 }  // namespace microsc_psf
