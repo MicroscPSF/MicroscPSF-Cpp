@@ -1,4 +1,6 @@
 microsc_psf_inc = include_directories('inc')
+
+if not get_option('header_only')
 microsc_psf_lib = static_library('microsc-psf',
     sources: [
         'src/main.cpp',
@@ -23,3 +25,4 @@ microsc_psf_dep = declare_dependency(
         armadillo_dep,
     ],
 )
+endif

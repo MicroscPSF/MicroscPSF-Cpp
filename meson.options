@@ -1,1 +1,2 @@
 option('install_examples', type: 'boolean', value: false)
+option('header_only', type: 'boolean', value: false)

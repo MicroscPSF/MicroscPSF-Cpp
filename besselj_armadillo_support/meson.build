@@ -1,6 +1,7 @@
 armadillo_besselj_support_inc = include_directories('inc')
 armadillo_dep = dependency('armadillo-code')
 
+if not get_option('header_only')
 # TODO(Antony): use "cxx.has_function" when it supports std namespace.
 if not cxx.compiles(
     '''#include <cmath>
@@ -31,3 +32,4 @@ test('Besselj wrapper',
     ],
     protocol: 'tap',
 )
+endif
