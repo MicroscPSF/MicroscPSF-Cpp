@@ -1,1 +1,2 @@
 option('install_examples', type: 'boolean', value: false)
+option('use_boost', type: 'boolean', value: false)

@@ -5,7 +5,7 @@ name: Compile and test C++
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
     types: [edited, submitted]
 
@@ -17,16 +17,16 @@ jobs:
       matrix:
         #os: [ubuntu-20.04, ubuntu-latest, windows-latest, macos-latest]
         os: [ubuntu-20.04, ubuntu-latest]
-        python-version: ["3.10"]
+        use_boost: ["false", "true"]
 
     steps:
     - name: Fetch sources
       uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.10"
         cache: pip
 
     - name: Install gcc toolchain
@@ -48,7 +48,10 @@ jobs:
         path: 3rdparty/packagecache/
 
     - name: Resolve C++ build dependencies (non-Windows)
-      run: meson setup build/
+      run: >-
+        meson setup
+        -Duse_boost=${{ matrix.use_boost }}
+        build/
       if: startsWith(matrix.os, 'window') == false
 
     #- name: Resolve C++ build dependencies (msvc toolchain)

@@ -4,7 +4,7 @@ revision = 14.0.2
 depth = 1
 
 patch_directory = armadillo-code
-diff_files = armadillo-code/0001-Patch-armdillo-to-support-besselj.patch
+diff_files = 0001-Patch-armadillo-to-support-besselj.patch
 
 [provide]
 armadillo-code = armadillo_dep

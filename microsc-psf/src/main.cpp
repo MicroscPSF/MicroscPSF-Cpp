@@ -1,9 +1,9 @@
+#include <armadillo_besselj_support.hpp>
 #include <cassert>
 
+// This must come after <boost/math/special_functions/bessel.hpp>
 #include "make_psf.h"
 
-// This must come after header file <armadillo>.
-#include <armadillo_besselj_support.hpp>
 namespace {
 
 // Return the range [0, N), excluding N.
