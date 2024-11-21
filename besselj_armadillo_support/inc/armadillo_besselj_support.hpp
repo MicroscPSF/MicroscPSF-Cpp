@@ -6,6 +6,10 @@
 #include <cmath>
 #include <cstdint>
 
+#ifdef BOOST_HAS_BESSEL
+#include <boost/math/special_functions/bessel.hpp>
+#endif
+
 #include <armadillo>
 
 namespace arma {

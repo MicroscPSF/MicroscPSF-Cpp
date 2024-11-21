@@ -1,0 +1,10 @@
+[wrap-file]
+directory = math-boost-1.83.0
+source_url = https://github.com/boostorg/math/archive/boost-1.83.0.tar.gz
+source_filename = boost-1.83.0.tar.gz
+source_hash = 53e5f7539a66899fe0fca3080405cbd5f7959da5394ec13664746741aece1705
+
+patch_directory = boost-math
+
+[provide]
+boost_math = boost_math_dep

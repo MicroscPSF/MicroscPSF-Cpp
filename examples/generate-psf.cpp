@@ -23,7 +23,7 @@ int main() {
 
     const auto psf =
         makePSF(params, {0.1_um, 0.25_um}, {256, 128}, 0.610_um, precision);
-#ifdef  ARMA_USE_HDF5
+#ifdef ARMA_USE_HDF5
     std::cout << "Saving volume to HDF5...\n";
     psf.save(hdf5_name("psf.h5", "psf", hdf5_opts::trans));
     std::cout << R"(Done.
