@@ -48,8 +48,22 @@ operator""_um(long double v) {
     return {static_cast<double>(v)};
 }
 
-static_assert(std::abs(Meter<double>(1.5_um) - 1.5e-6) < 1e-6, "Micrometer value out of scale");
-static_assert(std::abs((1.5_m).value - 1.5) < 1e-6, "Micrometer value out of scale");
+namespace internal {
+
+/** LLVM's abs is not a constant expression. Make our own function */
+template <typename T>
+constexpr T
+abs(T x) {
+    return (x >= 0) ? x : -x;
+}
+
+using ::units::Meter;
+using ::units::literals::operator""_um;
+
+static_assert(abs(Meter<double>(1.5_um) - 1.5e-6) < 1e-6, "Micrometer value out of scale");
+static_assert(abs((1.5_m).value - 1.5) < 1e-6, "Micrometer value out of scale");
+
+}  // namespace internal
 
 }  // namespace literals
 }  // namespace units
