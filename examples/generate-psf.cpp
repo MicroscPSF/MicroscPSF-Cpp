@@ -10,9 +10,20 @@ int main() {
     namespace hdf5_opts = arma::hdf5_opts;
     using namespace ::units::literals;
 
+    microscope_params_t params{};
+    params.NA = 1.4;
+    params.ti0 = 150.0_um;
+    params.ni = 1.5;
+    params.ni0 = 1.5;
+    params.pz = 2.0_um;
+
+    precision_li2017_t precision{};
+    precision.num_basis = 153;
+    precision.rho_samples = 1000;
+
     const auto psf =
-        makePSF(microscope_params_t{}, {0.1_um, 0.25_um}, {120, 63}, 0.530_um, precision_li2017_t{});
-#ifdef ARMA_USE_HDF5
+        makePSF(params, {0.1_um, 0.25_um}, {256, 128}, 0.610_um, precision);
+#ifdef  ARMA_USE_HDF5
     std::cout << "Saving volume to HDF5...\n";
     psf.save(hdf5_name("psf.h5", "psf", hdf5_opts::trans));
     std::cout << R"(Done.

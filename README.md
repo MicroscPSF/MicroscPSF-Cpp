@@ -53,6 +53,36 @@ ninja all
 sudo ninja install
 ```
 
+## Running the examples
+
+First, follow the *Quick start* instructions to build the example app. Then, given the following microscope configurations in the screenshot...
+<img src="https://www.ee.cuhk.edu.hk/~tblu/monsite/demos/fastPSF/gui.png"/>
+
+... program the example C++ file at (https://github.com/MicroscPSF/MicroscPSF-Cpp/blob/main/examples/generate-psf.cpp)[examples/generate-psf.cpp]
+
+```c++
+microscope_params_t params{};
+params.NA = 1.4;
+params.ti0 = 150.0_um;
+params.ni = 1.5;
+params.ni0 = 1.5;
+params.pz = 2.0_um;
+
+precision_li2017_t precision{};
+precision.num_basis = 153;
+precision.rho_samples = 1000;
+
+const auto psf =
+    makePSF(params, {0.1_um, 0.25_um}, {256, 128}, 0.610_um, precision);
+```
+
+Next, repeat the *Quick start* steps to re-compile the C++ app. Run `ninja test`
+to invoke the compiled example. Locate the outputs `psf_xy.pgm`, `psf_xz.pgm`,
+and `psf.h5`. The XZ cross-section of the C++-simulated PSF should match the
+screenshot above.
+
+<img src="examples/psf_xz.png"/>
+
 ## Appendix: Bessel function support
 
 - The original ISO C++ proposal: https://wg21.link/p0226r1
