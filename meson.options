@@ -1,2 +1,11 @@
 option('install_examples', type: 'boolean', value: false)
-option('use_boost', type: 'boolean', value: false)
+option('use_boost',
+    description: 'Compute bessel function of the first kind with Boost::Math',
+    type: 'boolean',
+    value: false,
+)
+option('use_eigen',
+    description: 'Solve linear least squares with Eigen3 the matrix library',
+    type: 'boolean',
+    value: false,
+)

@@ -1,5 +1,6 @@
 armadillo_besselj_support_inc = include_directories('inc')
-armadillo_dep = subproject('armadillo-code').get_variable('armadillo_dep')
+armadillo_proj = subproject('armadillo-code')
+armadillo_dep = armadillo_proj.get_variable('armadillo_dep')
 
 # TODO(Antony): use "cxx.has_function" when it supports std namespace.
 if get_option('use_boost')

@@ -16,8 +16,7 @@ jobs:
     strategy:
       matrix:
         #os: [ubuntu-20.04, ubuntu-latest, windows-latest, macos-latest]
-        os: [ubuntu-20.04, ubuntu-latest]
-        use_boost: ["false", "true"]
+        os: [ubuntu-20.04, ubuntu-latest, windows-latest]
 
     steps:
     - name: Fetch sources
@@ -47,16 +46,32 @@ jobs:
         key: ${{ runner.os }}-meson-cache
         path: 3rdparty/packagecache/
 
+    - name: Setup compile cache to reduce compile time
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-ccache
+
     - name: Resolve C++ build dependencies (non-Windows)
       run: >-
         meson setup
-        -Duse_boost=${{ matrix.use_boost }}
+        -Duse_boost=false
         build/
       if: startsWith(matrix.os, 'window') == false
 
-    #- name: Resolve C++ build dependencies (msvc toolchain)
-    #  run: meson setup --vsenv build/
-    #  if: startsWith(matrix.os, 'window') == true
+    - name: Resolve C++ build dependencies (msvc toolchain)
+      run: >-
+        meson setup
+        -Darmadillo-code:lapack=none
+        -Duse_boost=false
+        -Duse_eigen=true
+        build/
+      #run: >-
+      #  meson setup
+      #  --vsenv
+      #  -Darmadillo-code:lapack=none
+      #  -Duse_eigen=true
+      #  build/
+      if: startsWith(matrix.os, 'window') == true
 
     - name: Build everything
       #run: meson compile -C build/

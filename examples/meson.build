@@ -12,7 +12,10 @@ endif
 
 generate_psf_exe = executable('generate-psf',
     sources: 'generate-psf.cpp',
-    cpp_args: generate_psf_compile_args,
+    cpp_args: [
+        generate_psf_compile_args,
+        use_lapack_args,
+    ],
     dependencies: [
         microsc_psf_dep,
         hdf5_dep,

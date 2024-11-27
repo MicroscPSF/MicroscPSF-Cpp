@@ -2,6 +2,14 @@
 
 #include "make_psf.h"
 
+namespace {
+#ifdef LSTSQ_USE_LAPACK
+constexpr bool has_lapack = true;
+#else
+constexpr bool has_lapack = false;
+#endif
+}  // namespace
+
 int main() {
     using arma::hdf5_name;
     using microsc_psf::makePSF;
@@ -20,6 +28,7 @@ int main() {
     precision_li2017_t precision{};
     precision.num_basis = 153;
     precision.rho_samples = 1000;
+    precision.solver = has_lapack ? microsc_psf::SandersonAndCurtin2020 : microsc_psf::EigenBdcSVD;
 
     const auto psf =
         makePSF(params, {0.1_um, 0.25_um}, {256, 128}, 0.610_um, precision);

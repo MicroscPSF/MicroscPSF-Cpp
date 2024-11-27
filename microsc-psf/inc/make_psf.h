@@ -30,8 +30,14 @@ enum linear_solver_option_t : uint8_t {
     // https://arma.sourceforge.net/armadillo_solver_2020.pdf
     SandersonAndCurtin2020,
 
-    // Penrose pseudo inverse.
-    PenroseInverse
+    /** Penrose pseudo inverse. */
+    PenroseInverse,
+
+    /** Eigen's SVD solver.
+     *
+     * Reference: https://eigen.tuxfamily.org/dox/classEigen_1_1BDCSVD.html
+     */
+    EigenBdcSVD,
 };
 
 struct precision_li2017_t {

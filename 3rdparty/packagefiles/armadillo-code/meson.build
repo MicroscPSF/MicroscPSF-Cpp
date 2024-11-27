@@ -5,7 +5,10 @@ project('armadillo', 'cpp',
 # Header-only library
 armadillo_inc = include_directories('include')
 
-if get_option('lapack') == 'openblas64'
+if get_option('lapack') == 'none'
+  warning('Disabled Lapack dependencies. SVD and LU algorithms will be undefined.')
+  lapack_dep = dependency('', required: false)
+elif get_option('lapack') == 'openblas64'
   lapack_dep = dependency('openblas64')
 elif get_option('lapack') == 'openblas'
   lapack_dep = dependency('openblas')

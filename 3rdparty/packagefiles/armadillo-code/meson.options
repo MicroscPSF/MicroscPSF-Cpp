@@ -6,6 +6,7 @@ option('lapack',
         'openblas',
         'lapack64',
         'lapack',
+        'none',
     ],
     value: 'openblas',
 )

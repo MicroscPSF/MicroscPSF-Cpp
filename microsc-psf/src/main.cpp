@@ -4,6 +4,10 @@
 // This must come after <boost/math/special_functions/bessel.hpp>
 #include "make_psf.h"
 
+#ifdef LSTSQ_USE_EIGEN
+#include "linsolver.h"
+#endif
+
 namespace {
 
 // Return the range [0, N), excluding N.
@@ -137,7 +141,7 @@ makePSF(microscope_params_t params, scale_t<Micron> voxel, scale_t<uint32_t> vol
     {
         // Define the basis of Bessel functions.
         // Shape: number of basis function by number of rho samples.
-        auto&& J = besselj<0>(scaling_factor * Rho);
+#define J besselj<0>(scaling_factor * Rho)
 
         // Compute the approximation to the sampled pupil phase by finding the least squares
         // solution to the complex coefficients of the Fourier-Bessel expansion.
@@ -146,10 +150,35 @@ makePSF(microscope_params_t params, scale_t<Micron> voxel, scale_t<uint32_t> vol
         //
         // Note: Armadillo does not have solver for real-valued matrix and complex-valued vector.
         // Reference: https://arma.sourceforge.net/armadillo_solver_2020.pdf
-        cx_mat&& Ci = (precision.solver == SandersonAndCurtin2020)
-                          ? solve(conv_to<cx_mat>::from(J.t()), phase.t())
-                          : cx_mat(pinv(J.t()) * phase.t());
+        cx_mat Ci;
+        switch (precision.solver) {
+#ifdef LSTSQ_USE_LAPACK
+            case SandersonAndCurtin2020:
+                Ci = solve(conv_to<cx_mat>::from(J.t()), phase.t());
+                break;
+            case PenroseInverse:
+                Ci = pinv(J.t()) * phase.t();
+                break;
+#else
+            case SandersonAndCurtin2020:
+            case PenroseInverse:
+                throw std::invalid_argument(R"(LAPACK not found.
+Re-configure the C++ project with
+"meson configure -Darmadillo-code:lapack=..." and try again.)");
+                break;
+#endif
 
+            case EigenBdcSVD: {
+#ifndef LSTSQ_USE_EIGEN
+                throw std::invalid_argument(R"(Eigen::BdcSVD solver not implemented.
+Re-configure the C++ project with
+"meson configure -Duse_eigen=true" and try again.)");
+#else
+                constexpr bool always_transpose_phase = true;
+                Ci = microsc_psf::internal::solveWithEigen<always_transpose_phase>(J.t(), phase);
+#endif
+            }
+        }
         const cx_mat ciEle = Ele * Ci;
         PSF0 = real(ciEle % conj(ciEle));
     }
