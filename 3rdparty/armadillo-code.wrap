@@ -1,7 +1,8 @@
-[wrap-git]
-url = https://gitlab.com/conradsnicta/armadillo-code.git
-revision = 14.0.2
-depth = 1
+[wrap-file]
+directory = armadillo-code-14.0.2
+source_url = https://gitlab.com/conradsnicta/armadillo-code/-/archive/14.0.2/armadillo-code-14.0.2.tar.gz
+source_filename = armadillo-code-14.0.2.tar.gz
+source_hash = a067616d88af8d993fce1c73e1ebcf66aa57551a8bc6ba5b7f62b7b99991d207
 
 patch_directory = armadillo-code
 diff_files = 0001-Patch-armadillo-to-support-besselj.patch
