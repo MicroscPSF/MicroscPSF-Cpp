@@ -56,9 +56,10 @@ sudo ninja install
 ## Running the examples
 
 First, follow the *Quick start* instructions to build the example app. Then, given the following microscope configurations in the screenshot...
-<img src="https://www.ee.cuhk.edu.hk/~tblu/monsite/demos/fastPSF/gui.png"/>
+![MicroscPSF-Matlab GUI](https://www.ee.cuhk.edu.hk/~tblu/monsite/demos/fastPSF/gui.png)
 
-... program the example C++ file at (https://github.com/MicroscPSF/MicroscPSF-Cpp/blob/main/examples/generate-psf.cpp)[examples/generate-psf.cpp]
+... program the example C++ file at
+[examples/generate-psf.cpp](https://github.com/MicroscPSF/MicroscPSF-Cpp/blob/main/examples/generate-psf.cpp)
 
 ```c++
 microscope_params_t params{};
