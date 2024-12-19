@@ -58,7 +58,7 @@ jobs:
         build/
       if: startsWith(matrix.os, 'window') == false
 
-    - name: Resolve C++ build dependencies (msvc toolchain)
+    - name: Resolve C++ build dependencies (mingw-w64 toolchain)
       run: >-
         meson setup
         -Darmadillo-code:lapack=none

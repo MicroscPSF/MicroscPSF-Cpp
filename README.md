@@ -7,9 +7,7 @@
 Currently, this work is a *very* early work in progress. Refer to
 https://github.com/MicroscPSF/MicroscPSF-Matlab for the reference implementation.
 
-## Quick start
-
-### Ubuntu/Linux
+## Quick start on Ubuntu/Linux
 
 Install the compiler toolchain and the BLAS/LAPACK library:
 
@@ -53,10 +51,37 @@ ninja all
 sudo ninja install
 ```
 
+## Other operating system support
+
+### Windows
+
+The C++ library only offers experimental support on MSVC/MinGW toolchain. Please
+refer to the build instruction file for details: https://github.com/MicroscPSF/MicroscPSF-Cpp/blob/main/.github/workflows/validate-build.yml
+
+### MacOSX
+
+Mac provides a nice *Accelerate* LAPACK interface in the Apple Framework. The
+build system is capable of [automatically detecting the framework as build
+depdendency](https://mesonbuild.com/Dependencies.html#appleframeworks), so the
+library should be able to compile and run PSF simulation natively.
+
+The project is looking for volunteers and incoming PRs to enable Mac support.
+
+Wishlist:
+
+- [X] Enable Bessel function support from 3rd party library #14 .
+
+- [ ] Modify
+  [meson.build](https://github.com/MicroscPSF/MicroscPSF-Cpp/blob/main/3rdparty/packagefiles/armadillo-code/meson.build#L19)
+  to detect the Accelerate LAPACK interface in Apple Framework.
+
+- [ ] Document the build options, i.e. `meson setup -Duse_boost=true -Darmadillo-code:lapack=framework build-for-macosx`
+
 ## Running the examples
 
 First, follow the *Quick start* instructions to build the example app. Then, given the following microscope configurations in the screenshot...
-![MicroscPSF-Matlab GUI](https://www.ee.cuhk.edu.hk/~tblu/monsite/demos/fastPSF/gui.png)
+
+![MicroscPSF-Matlab GUI](examples/gui.png)
 
 ... program the example C++ file at
 [examples/generate-psf.cpp](https://github.com/MicroscPSF/MicroscPSF-Cpp/blob/main/examples/generate-psf.cpp)
