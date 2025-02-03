@@ -47,6 +47,18 @@ solveWithEigen(const arma::mat& A_buffer, const arma::cx_mat& b_buffer) {
     return xopt_buffer;
 }
 
+double
+rcond(const arma::mat& A_buffer) {
+    using Eigen::JacobiSVD;
+    using Eigen::Map;
+    using Eigen::MatrixXd;
+    const Map<const MatrixXd> A(A_buffer.memptr(), A_buffer.n_rows, A_buffer.n_cols);
+
+    // https://stackoverflow.com/a/33577450
+    const JacobiSVD<MatrixXd> svd(A);
+    return svd.singularValues()(svd.singularValues().size() - 1) / svd.singularValues()(0);
+}
+
 template arma::cx_mat solveWithEigen<true>(const arma::mat&, const arma::cx_mat&);
 template arma::cx_mat solveWithEigen<false>(const arma::mat&, const arma::cx_mat&);
 }  // namespace internal

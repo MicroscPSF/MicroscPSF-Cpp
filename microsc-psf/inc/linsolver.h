@@ -19,5 +19,12 @@ namespace internal {
  */
 template <bool transpose_b>
 arma::cx_mat solveWithEigen(const arma::mat& A, const arma::cx_mat& b);
+
+/** Recipical condition number of a real-valued matrix.
+ *
+ * Used for algorithm tuning to maximize numerical stability. Otherwise unused
+ * in production code.
+ */
+double rcond(const arma::mat& A);
 }  // namespace internal
 }  // namespace microsc_psf

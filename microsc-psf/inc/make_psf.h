@@ -55,5 +55,6 @@ struct scale_t {
 };
 
 arma::Cube<double> makePSF(microscope_params_t, scale_t<Micron> voxel, scale_t<uint32_t> volume,
-                           Micron wavelength = 0.530_um, precision_li2017_t = {});
+                           Micron wavelength = 0.530_um, precision_li2017_t = {},
+                           double* rcond_value = nullptr);
 }  // namespace microsc_psf

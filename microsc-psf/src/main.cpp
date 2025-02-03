@@ -1,3 +1,4 @@
+#define ARMA_WARN_LEVEL 1
 #include <armadillo_besselj_support.hpp>
 #include <cassert>
 
@@ -60,7 +61,7 @@ namespace microsc_psf {
 
 arma::Cube<double>
 makePSF(microscope_params_t params, scale_t<Micron> voxel, scale_t<uint32_t> volume,
-        Micron wavelength, precision_li2017_t precision) {
+        Micron wavelength, precision_li2017_t precision, double* rcond_value) {
     using ::units::literals::operator""_m;
 
     const double x0 = (volume.xy - 1) / 2.0;
@@ -153,9 +154,13 @@ makePSF(microscope_params_t params, scale_t<Micron> voxel, scale_t<uint32_t> vol
         cx_mat Ci;
         switch (precision.solver) {
 #ifdef LSTSQ_USE_LAPACK
-            case SandersonAndCurtin2020:
+            case SandersonAndCurtin2020: {
                 Ci = solve(conv_to<cx_mat>::from(J.t()), phase.t());
+                if (rcond_value != nullptr) {
+                    *rcond_value = 1.0 / cond(J.t());
+                }
                 break;
+            }
             case PenroseInverse:
                 Ci = pinv(J.t()) * phase.t();
                 break;
@@ -176,6 +181,9 @@ Re-configure the C++ project with
 #else
                 constexpr bool always_transpose_phase = true;
                 Ci = microsc_psf::internal::solveWithEigen<always_transpose_phase>(J.t(), phase);
+                if (rcond_value != nullptr) {
+                    *rcond_value = microsc_psf::internal::rcond(J);
+                }
 #endif
             }
         }
