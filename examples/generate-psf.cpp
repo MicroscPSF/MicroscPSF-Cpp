@@ -20,7 +20,7 @@ int main() {
 
     microscope_params_t params{};
     params.NA = 1.4;
-    params.ti0 = 150.0_um;
+    params.ti = params.ti0 = 150.0_um;
     params.ni = 1.5;
     params.ni0 = 1.5;
     params.pz = 2.0_um;

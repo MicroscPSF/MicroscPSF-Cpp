@@ -11,6 +11,7 @@ using Meter = ::units::Meter<double>;
 using ::units::literals::operator""_um;
 
 struct microscope_params_t {
+    Micron ti = 150.0_um;      //!< Measured immersion medium thickness
     Micron ti0 = 150.0_um;     //!< Expected immersion medium thickness
     float ni0 = 1.5;           //!< Expected immersion medium refractive index
     float ni = 1.5;            //!< Measured immersion medium refractive index

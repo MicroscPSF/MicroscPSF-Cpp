@@ -95,7 +95,7 @@ makePSF(microscope_params_t params, scale_t<Micron> voxel, scale_t<uint32_t> vol
     cx_mat phase;
     {
 /** Coverglass z offset in meter */
-#define Ti (Meter(params.ti0) + Meter(voxel.z) * (iota(volume.z) - z0))
+#define Ti (Meter(params.ti) + Meter(voxel.z) * (iota(volume.z) - z0))
 
         const double C1 = params.ns * Meter(params.pz);
 #define C2 (params.ni * (Ti - Meter(params.ti0)))
