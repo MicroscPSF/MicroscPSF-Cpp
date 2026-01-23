@@ -1,5 +1,7 @@
 project('armadillo', 'cpp',
     version: '14.0.x',
+    license: 'Apache',
+    license_files: ['LICENSE.txt'],
 )
 
 # Header-only library
