@@ -155,9 +155,10 @@ makePSF(microscope_params_t params, scale_t<Micron> voxel, scale_t<uint32_t> vol
         switch (precision.solver) {
 #ifdef LSTSQ_USE_LAPACK
             case SandersonAndCurtin2020: {
-                Ci = solve(conv_to<cx_mat>::from(J.t()), phase.t());
+                const mat Jt = J.t();
+                Ci = solve(conv_to<cx_mat>::from(Jt), phase.t());
                 if (rcond_value != nullptr) {
-                    *rcond_value = 1.0 / cond(J.t());
+                    *rcond_value = 1.0 / cond(Jt);
                 }
                 break;
             }
@@ -179,10 +180,11 @@ Re-configure the C++ project with
 Re-configure the C++ project with
 "meson configure -Duse_eigen=true" and try again.)");
 #else
+                const mat Jt = J.t();
                 constexpr bool always_transpose_phase = true;
-                Ci = microsc_psf::internal::solveWithEigen<always_transpose_phase>(J.t(), phase);
+                Ci = microsc_psf::internal::solveWithEigen<always_transpose_phase>(Jt, phase);
                 if (rcond_value != nullptr) {
-                    *rcond_value = microsc_psf::internal::rcond(J);
+                    *rcond_value = microsc_psf::internal::rcond(Jt);
                 }
 #endif
             }
