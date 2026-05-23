@@ -9,3 +9,8 @@ option('use_eigen',
     type: 'boolean',
     value: false,
 )
+option('use_openmp',
+    description: 'Perform cylindrical frame to Cartesian frame interpolation with multithread',
+    type: 'boolean',
+    value: false,
+)

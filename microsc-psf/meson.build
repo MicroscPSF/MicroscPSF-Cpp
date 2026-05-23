@@ -32,6 +32,11 @@ else
     use_lapack_args = []
 endif
 
+openmp_dep = get_option('use_openmp') ? [
+    dependency('openmp', language: 'cpp'),
+    dependency('threads'),
+] : []
+
 microsc_psf_lib = static_library('microsc-psf',
     sources: [
         'src/main.cpp',
@@ -48,6 +53,7 @@ microsc_psf_lib = static_library('microsc-psf',
         armadillo_dep,
         boost_math_dep,
         eigen_solver_dep,
+        openmp_dep,
     ],
 )
 
@@ -60,5 +66,6 @@ microsc_psf_dep = declare_dependency(
     ],
     dependencies: [
         armadillo_dep,
+        openmp_dep,
     ],
 )
