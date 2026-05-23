@@ -1,5 +1,7 @@
 microsc_psf_inc = include_directories('inc')
 
+enable_autovectorization = meson.is_cross_build() ? '' : '-march=native'
+
 if get_option('use_eigen')
     warning('Solving linear least squares with Eigen3, not Lapack')
 
@@ -10,6 +12,7 @@ if get_option('use_eigen')
     eigen_solver_lib = static_library('eigen_solver',
         sources: 'src/linsolver.cpp',
         include_directories: include_directories('inc'),
+        cpp_args: enable_autovectorization,
         dependencies: [
             dependency('eigen', fallback: ['eigen', 'eigen_dep']),
             armadillo_dep,
@@ -39,6 +42,7 @@ microsc_psf_lib = static_library('microsc-psf',
     cpp_args: [
         '-D' + bessel_source,
         use_lapack_args,
+        enable_autovectorization,
     ],
     include_directories: [
         microsc_psf_inc,
